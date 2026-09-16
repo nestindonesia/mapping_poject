@@ -1,5 +1,51 @@
 {
   "type": "FeatureCollection",
+  "kawasanInfo": {
+    "nama": "KAWASAN MONITORING KEHATI TAMAN KEHATI KOTA BANDUNG",
+    "tahun": "2026",
+    "luasTetap": "1657 Ha",
+    "logoDataUrl": null,
+    "namaZonaList": [
+      {
+        "nama": "Zona Agroforestry",
+        "warna": "#2f7bbf"
+      },
+      {
+        "nama": "Zona Edukasi dan Etalase KEHATI",
+        "warna": "#a9d6e5"
+      },
+      {
+        "nama": "Zona Toponimi Agroforestry",
+        "warna": "#f7e017"
+      },
+      {
+        "nama": "Zona Pengembangan Agroforestry",
+        "warna": "#e53935"
+      },
+      {
+        "nama": "Zona Rimba Agroforestry",
+        "warna": "#8bc34a"
+      },
+      {
+        "nama": "Zona Rimba Ciliwung",
+        "warna": "#2e7d32"
+      },
+      {
+        "nama": "Zona/Blok Lainnya",
+        "warna": "#cddc9a"
+      }
+    ],
+    "kategoriList": [
+      {
+        "key": "eksisting",
+        "label": "Kawasan Eksisting"
+      },
+      {
+        "key": "rencana",
+        "label": "Rencana Pengembangan Perluasan Kawasan"
+      }
+    ]
+  },
   "features": [
     {
       "type": "Feature",

@@ -681,8 +681,23 @@ document.getElementById("btn-export-geojson").addEventListener("click", async ()
     alert("Belum ada zona untuk diekspor.");
     return;
   }
+  const info = (await getKawasanInfo()) || {};
   const geojson = {
     type: "FeatureCollection",
+    // "kawasanInfo" bukan bagian dari standar GeoJSON (RFC 7946 mengizinkan
+    // anggota tambahan seperti ini di level atas) -- QGIS/Google Earth akan
+    // mengabaikannya begitu saja, tapi aplikasi Peta Kawasan ini memakainya
+    // untuk memuat ulang kop judul, legenda, dan daftar nama/kategori secara
+    // utuh (bukan cuma bentuk zonanya) saat dibuka pertama kali di perangkat
+    // atau browser lain (mis. versi publik GitHub Pages).
+    kawasanInfo: {
+      nama: document.getElementById("info-nama").value,
+      tahun: document.getElementById("info-tahun").value,
+      luasTetap: document.getElementById("info-luas-tetap").value,
+      logoDataUrl: info.logoDataUrl || null,
+      namaZonaList,
+      kategoriList,
+    },
     features: zonas.map((z) => ({
       type: "Feature",
       geometry: z.geojson.geometry,
@@ -760,6 +775,23 @@ async function importDariFileJikaPerlu() {
       const resp = await fetch("data/peta-kawasan.geojson");
       if (resp.ok) {
         const geojson = await resp.json();
+
+        // Kop judul, legenda, daftar nama zona & kategori -- ikut dimuat utuh
+        // kalau file ekspornya menyertakan "kawasanInfo" (lihat tombol Ekspor
+        // GeoJSON), bukan cuma bentuk zonanya saja.
+        const ki = geojson.kawasanInfo;
+        if (ki) {
+          if (ki.nama) document.getElementById("info-nama").value = ki.nama;
+          if (ki.tahun) document.getElementById("info-tahun").value = ki.tahun;
+          if (ki.luasTetap) document.getElementById("info-luas-tetap").value = ki.luasTetap;
+          if (ki.logoDataUrl) {
+            logoDataUrl = ki.logoDataUrl;
+            tampilkanPratinjauLogo();
+          }
+          if (Array.isArray(ki.namaZonaList) && ki.namaZonaList.length) namaZonaList = ki.namaZonaList;
+          if (Array.isArray(ki.kategoriList) && ki.kategoriList.length) kategoriList = ki.kategoriList;
+        }
+
         let nomorBerikutnya = 1;
         for (const f of geojson.features || []) {
           const p = f.properties || {};
@@ -796,7 +828,16 @@ async function importDariFileJikaPerlu() {
     }
   }
 
-  await saveKawasanInfo({ ...(await getKawasanInfo()), namaZonaList, kategoriList, sudahImporAwal: true });
+  await saveKawasanInfo({
+    ...(await getKawasanInfo()),
+    nama: document.getElementById("info-nama").value,
+    tahun: document.getElementById("info-tahun").value,
+    luasTetap: document.getElementById("info-luas-tetap").value,
+    logoDataUrl,
+    namaZonaList,
+    kategoriList,
+    sudahImporAwal: true,
+  });
 }
 
 (async () => {

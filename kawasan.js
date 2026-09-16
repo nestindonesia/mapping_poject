@@ -659,5 +659,90 @@ document.getElementById("btn-hapus-semua").addEventListener("click", async () =>
   await renderZona();
 });
 
+// ---------- Ekspor untuk QGIS (GeoJSON) / Google Earth (KML) ----------
+function downloadBlob(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function kategoriLabel(key) {
+  const k = kategoriList.find((x) => x.key === key);
+  return k ? k.label : key;
+}
+
+document.getElementById("btn-export-geojson").addEventListener("click", async () => {
+  const zonas = await getAllZona();
+  if (!zonas.length) {
+    alert("Belum ada zona untuk diekspor.");
+    return;
+  }
+  const geojson = {
+    type: "FeatureCollection",
+    features: zonas.map((z) => ({
+      type: "Feature",
+      geometry: z.geojson.geometry,
+      properties: {
+        nomor: z.nomor,
+        nama: z.nama,
+        kategori: z.kategori,
+        kategori_label: kategoriLabel(z.kategori),
+        warna: z.warna,
+        luas_ha: Number(z.luas_ha.toFixed(4)),
+      },
+    })),
+  };
+  downloadBlob("peta-kawasan.geojson", JSON.stringify(geojson, null, 2), "application/geo+json");
+});
+
+// Warna hex "#rrggbb" -> warna KML "aabbggrr" (urutan byte KML kebalikan dari hex biasa)
+function hexToKmlColor(hex, alphaHex = "cc") {
+  const h = hex.replace("#", "");
+  const r = h.substring(0, 2);
+  const g = h.substring(2, 4);
+  const b = h.substring(4, 6);
+  return `${alphaHex}${b}${g}${r}`;
+}
+
+document.getElementById("btn-export-kml").addEventListener("click", async () => {
+  const zonas = await getAllZona();
+  if (!zonas.length) {
+    alert("Belum ada zona untuk diekspor.");
+    return;
+  }
+  const escXml = (s) => String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+  const placemarks = zonas
+    .map((z) => {
+      const rings = z.geojson.geometry.type === "Polygon" ? [z.geojson.geometry.coordinates] : z.geojson.geometry.coordinates;
+      const polyKml = rings
+        .map((rangPoly) => {
+          const outer = rangPoly[0].map(([lon, lat]) => `${lon},${lat},0`).join(" ");
+          return `<Polygon><outerBoundaryIs><LinearRing><coordinates>${outer}</coordinates></LinearRing></outerBoundaryIs></Polygon>`;
+        })
+        .join("");
+      const styleId = `warna_${z.id}`;
+      return `
+        <Style id="${styleId}">
+          <LineStyle><color>ff${z.warna.replace("#", "").match(/../g).reverse().join("")}</color><width>2</width></LineStyle>
+          <PolyStyle><color>${hexToKmlColor(z.warna)}</color></PolyStyle>
+        </Style>
+        <Placemark>
+          <name>Zona ${escXml(z.nomor)} - ${escXml(z.nama)}</name>
+          <description>${escXml(kategoriLabel(z.kategori))} &middot; &plusmn;${z.luas_ha.toFixed(3)} Ha</description>
+          <styleUrl>#${styleId}</styleUrl>
+          ${polyKml}
+        </Placemark>`;
+    })
+    .join("");
+
+  const kml = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>${placemarks}</Document></kml>`;
+  downloadBlob("peta-kawasan.kml", kml, "application/vnd.google-earth.kml+xml");
+});
+
 loadKawasanInfo();
 renderZona();

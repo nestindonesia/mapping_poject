@@ -744,5 +744,63 @@ document.getElementById("btn-export-kml").addEventListener("click", async () => 
   downloadBlob("peta-kawasan.kml", kml, "application/vnd.google-earth.kml+xml");
 });
 
-loadKawasanInfo();
-renderZona();
+// ---------- Muat data awal dari data/peta-kawasan.geojson (sekali saja) ----------
+// Supaya kalau situs ini dibuka pertama kali dari perangkat/browser lain (mis.
+// versi publik di GitHub Pages, yang IndexedDB-nya selalu kosong), zona yang
+// sudah pernah diekspor & di-commit ke repo langsung tampil -- bukan kosong.
+// Hanya dicoba SEKALI (ditandai lewat "sudahImporAwal"), supaya kalau nanti
+// pengguna sengaja menghapus semua zona, tidak diisi ulang otomatis lagi.
+async function importDariFileJikaPerlu() {
+  const info = (await getKawasanInfo()) || {};
+  if (info.sudahImporAwal) return;
+
+  const existing = await getAllZona();
+  if (existing.length === 0) {
+    try {
+      const resp = await fetch("data/peta-kawasan.geojson");
+      if (resp.ok) {
+        const geojson = await resp.json();
+        let nomorBerikutnya = 1;
+        for (const f of geojson.features || []) {
+          const p = f.properties || {};
+          const nomor = p.nomor != null ? String(p.nomor) : String(nomorBerikutnya);
+          nomorBerikutnya = Math.max(nomorBerikutnya, Number(nomor) || 0) + 1;
+          const nama = p.nama || "Zona";
+          const kategori = p.kategori || kategoriList[0].key;
+          const warna = p.warna || randomWarna();
+          const luas_ha = typeof p.luas_ha === "number" ? p.luas_ha : 0;
+
+          if (!kategoriList.some((k) => k.key === kategori)) {
+            kategoriList.push({ key: kategori, label: p.kategori_label || kategori });
+          }
+          if (!namaZonaList.some((n) => n.nama === nama)) {
+            namaZonaList.push({ nama, warna });
+          }
+
+          await addZona({
+            nomor,
+            nama,
+            kategori,
+            warna,
+            luas_ha,
+            geojson: { type: "Feature", properties: {}, geometry: f.geometry },
+          });
+        }
+        populatePaletDropdown();
+        populateKategoriDropdown();
+        renderKelolaNama();
+        renderKelolaKategori();
+      }
+    } catch (err) {
+      // data/peta-kawasan.geojson tidak ada / gagal dimuat -- lewati saja, bukan error fatal.
+    }
+  }
+
+  await saveKawasanInfo({ ...(await getKawasanInfo()), namaZonaList, kategoriList, sudahImporAwal: true });
+}
+
+(async () => {
+  await loadKawasanInfo();
+  await importDariFileJikaPerlu();
+  await renderZona();
+})();

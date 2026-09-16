@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Peta GIS Wilayah</title>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <h1>Peta GIS Wilayah</h1>
+  <p>Titik lokasi dari foto (GPS/EXIF), dikelompokkan per wilayah, dengan perkiraan area &amp; batas administratif resmi. &middot; <a href="kawasan.html" style="color:#fff;opacity:0.85">Peta Kawasan / Zonasi &rarr;</a></p>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <h2>Tambah Titik</h2>
+    <form id="add-form">
+      <div class="field">
+        <label for="f-wilayah">Nama Wilayah</label>
+        <input type="text" id="f-wilayah" placeholder="mis. Hutan Adat Wehea" required />
+      </div>
+      <div class="field">
+        <label for="f-radius">Radius perkiraan area (meter)</label>
+        <input type="number" id="f-radius" value="500" min="10" step="10" />
+      </div>
+      <div class="field">
+        <label for="f-files">Foto (JPEG, bisa lebih dari satu)</label>
+        <input type="file" id="f-files" accept="image/jpeg" multiple required />
+      </div>
+      <button type="submit" class="btn btn-primary">+ Tambah ke Peta</button>
+    </form>
+    <p id="status" class="hint"></p>
+
+    <div class="export-row">
+      <button type="button" id="export-geojson-btn" class="btn">Ekspor GeoJSON</button>
+      <button type="button" id="export-kml-btn" class="btn">Ekspor KML</button>
+    </div>
+
+    <hr class="sep" />
+    <h2>Daftar Wilayah</h2>
+    <div id="list-container"></div>
+  </aside>
+
+  <div id="map"></div>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

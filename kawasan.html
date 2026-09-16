@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Peta Kawasan / Zonasi</title>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+<link rel="stylesheet" href="vendor/leaflet-draw/leaflet.draw.css" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="kawasan.css" />
+</head>
+<body>
+
+<header>
+  <h1>Peta Kawasan / Zonasi</h1>
+  <p>Gambar poligon zona di atas citra satelit, beri nama &amp; warna, lalu cetak sebagai peta kawasan lengkap dengan legenda. &middot; <a href="index.html" class="nav-link">&larr; Peta Foto Wilayah</a></p>
+</header>
+
+<div class="layout layout-kawasan">
+  <aside class="sidebar">
+    <div class="no-print">
+      <h2>Info Kawasan</h2>
+      <form id="info-form">
+        <div class="field">
+          <label for="info-nama">Nama Kawasan</label>
+          <input type="text" id="info-nama" />
+        </div>
+        <div class="field">
+          <label for="info-tahun">Tahun Ditetapkan</label>
+          <input type="text" id="info-tahun" />
+        </div>
+        <div class="field">
+          <label for="info-luas-tetap">Luas Resmi Ditetapkan (Ha, opsional)</label>
+          <input type="text" id="info-luas-tetap" placeholder="mis. 4.657" />
+        </div>
+      </form>
+      <div class="field">
+        <label for="info-logo">Logo Kawasan (opsional, untuk kop cetak)</label>
+        <input type="file" id="info-logo" accept="image/*" />
+        <div id="info-logo-preview-wrap" class="logo-preview-wrap" hidden>
+          <img id="info-logo-preview" class="logo-preview" alt="Pratinjau logo" />
+          <button type="button" id="info-logo-hapus" class="btn btn-danger btn-small">Hapus Logo</button>
+        </div>
+      </div>
+      <p class="hint">Luas hasil digitasi (jumlah semua zona di peta): <strong id="luas-digitasi">0</strong> Ha</p>
+
+      <button type="button" id="btn-mode" class="btn btn-primary">Mode: Peta Kawasan</button>
+      <button type="button" id="btn-cetak" class="btn">Cetak Peta Ini</button>
+      <button type="button" id="btn-hapus-semua" class="btn btn-danger">Hapus Semua Zona</button>
+
+      <hr class="sep" />
+      <div class="kelola-header">
+        <h2>Nama Zona</h2>
+        <button type="button" id="btn-tambah-nama" class="btn btn-small">+ Tambah</button>
+      </div>
+      <div id="kelola-nama-list"></div>
+
+      <hr class="sep" />
+      <div class="kelola-header">
+        <h2>Kategori</h2>
+        <button type="button" id="btn-tambah-kategori" class="btn btn-small">+ Tambah</button>
+      </div>
+      <div id="kelola-kategori-list"></div>
+    </div>
+
+    <hr class="sep" />
+    <h2>Legenda</h2>
+    <div id="legenda-list"></div>
+
+    <hr class="sep no-print" />
+    <h2 class="no-print">Daftar Zona</h2>
+    <p class="hint no-print">Gambar poligon baru lewat ikon poligon di kiri atas peta.</p>
+    <div id="zona-list" class="no-print"></div>
+  </aside>
+
+  <div id="map"></div>
+</div>
+
+<!-- Modal tambah/edit zona -->
+<div id="zona-modal" class="modal-overlay no-print" hidden>
+  <form id="modal-form" class="modal-card">
+    <h3 id="modal-title">Zona Baru</h3>
+    <div class="field">
+      <label for="modal-nomor">Nomor Zona</label>
+      <input type="text" id="modal-nomor" required />
+    </div>
+    <div class="field">
+      <label for="modal-nama">Nama Zona</label>
+      <select id="modal-nama"></select>
+    </div>
+    <div class="field">
+      <input type="text" id="modal-nama-custom" placeholder="Ketik nama zona..." />
+    </div>
+    <div class="field">
+      <label for="modal-warna">Warna</label>
+      <input type="color" id="modal-warna" />
+    </div>
+    <div class="field">
+      <label for="modal-kategori">Kategori</label>
+      <select id="modal-kategori">
+        <option value="eksisting">Kawasan Eksisting</option>
+        <option value="rencana">Rencana Pengembangan</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Simpan</button>
+      <button type="button" id="modal-cancel" class="btn btn-ghost">Batal</button>
+    </div>
+  </form>
+</div>
+
+<!-- Lembar cetak: 2 panel bertumpuk (Peta Kawasan + Peta Tematik), mengikuti
+     tata letak kop peta referensi. Hanya terlihat saat mencetak; di layar
+     posisinya digeser keluar viewport (bukan display:none) supaya kedua peta
+     Leaflet di dalamnya tetap bisa diberi ukuran & dimuat lebih dulu. -->
+<div id="cetak-sheet">
+  <section class="cetak-panel">
+    <div id="cetak-map-kawasan" class="cetak-map"></div>
+    <div class="cetak-info">
+      <h2 id="cetak-judul-1">TAMAN KEHATI KOTA BANDUNG</h2>
+      <div class="cetak-logo-box"></div>
+      <h3>PETA KAWASAN<br/>TAMAN KEHATI</h3>
+      <div class="cetak-legend-container"></div>
+    </div>
+  </section>
+
+  <section class="cetak-panel">
+    <div id="cetak-map-tematik" class="cetak-map"></div>
+    <div class="cetak-info">
+      <h2 id="cetak-judul-2">TAMAN KEHATI KOTA BANDUNG</h2>
+      <div class="cetak-logo-box"></div>
+      <h3>PETA TEMATIK KAWASAN<br/>TAMAN KEHATI</h3>
+      <div class="cetak-legend-container"></div>
+    </div>
+  </section>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/leaflet-draw/leaflet.draw.js"></script>
+<script type="module" src="kawasan.js"></script>
+</body>
+</html>

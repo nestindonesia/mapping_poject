@@ -1,0 +1,157 @@
+.nav-link { color: #fff; opacity: 0.85; }
+.nav-link:hover { opacity: 1; }
+
+[hidden] { display: none !important; }
+
+.layout-kawasan .sidebar { display: flex; flex-direction: column; }
+
+#btn-mode, #btn-cetak { width: 100%; margin-top: 8px; }
+
+#map.mode-tematik { background: #ffffff; }
+
+.legenda-row { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 6px; }
+.swatch { width: 16px; height: 16px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.25); flex-shrink: 0; }
+
+.zona-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.zona-row .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.zona-row-main { flex: 1; }
+
+.zona-label {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-weight: 700;
+  font-size: 13px;
+  color: #1a1815;
+  text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff;
+}
+
+/* ---------- Kelola Nama Zona / Kategori ---------- */
+.kelola-header { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.kelola-header h2 { margin: 0; }
+.kelola-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.kelola-row .swatch { cursor: default; }
+.kelola-row-label { flex: 1; }
+.kelola-row .btn-small { padding: 3px 8px; }
+
+/* ---------- Modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-card {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 20px;
+  width: 320px;
+  max-width: 90vw;
+  box-shadow: var(--shadow);
+}
+.modal-card h3 { margin-top: 0; }
+
+/* ---------- Lembar cetak (2 panel: Peta Kawasan + Peta Tematik) ----------
+   Di layar, digeser jauh ke luar viewport (bukan display:none) supaya kedua
+   peta Leaflet di dalamnya sudah punya ukuran nyata dan sempat memuat citra
+   sebelum dialog cetak dibuka. */
+#cetak-sheet {
+  position: fixed;
+  left: -99999px;
+  top: 0;
+  width: 1050px;
+  background: #fff;
+}
+.cetak-panel {
+  display: flex;
+  width: 1050px;
+  height: 680px;
+  margin-bottom: 24px;
+  border: 2px solid #000;
+  background: #fff;
+  color: #111;
+  font-family: Arial, "Segoe UI", sans-serif;
+}
+.cetak-map { width: 800px; height: 100%; background: #fff; flex-shrink: 0; }
+.cetak-info {
+  width: 250px;
+  flex-shrink: 0;
+  border-left: 2px solid #000;
+  padding: 14px;
+  overflow: hidden;
+}
+.cetak-info h2 { font-size: 16px; margin: 0 0 6px; line-height: 1.2; }
+.cetak-info h3 { font-size: 13px; margin: 10px 0 8px; line-height: 1.3; }
+.cetak-logo-box { margin: 4px 0 8px; min-height: 1px; }
+.cetak-logo-box img { max-width: 140px; max-height: 50px; display: block; }
+
+.logo-preview-wrap { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.logo-preview { max-width: 80px; max-height: 40px; border-radius: 4px; border: 1px solid var(--border); background: #fff; }
+.cetak-legend-box { border-top: 1px solid #000; padding-top: 8px; margin-top: 10px; }
+.cetak-legend-title { font-weight: 700; font-size: 12px; margin: 0 0 4px; }
+.cetak-legend-sub { font-size: 10px; margin: 0 0 8px; line-height: 1.4; }
+.cetak-legend-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+.cetak-legend-chip {
+  min-width: 46px;
+  padding: 1px 6px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 9px;
+  text-align: center;
+  border: 1px solid rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cetak-legend-desc { flex: 1; align-self: center; }
+
+.only-print { display: none; }
+
+@media print {
+  @page { size: landscape; margin: 10mm; }
+  body * { visibility: hidden; }
+  #cetak-sheet, #cetak-sheet * { visibility: visible; }
+  #cetak-sheet {
+    position: static;
+    left: 0;
+    width: 100%;
+  }
+  .cetak-panel {
+    width: 100%;
+    height: auto;
+    page-break-after: always;
+  }
+  .cetak-panel:last-child { page-break-after: auto; }
+  .cetak-map { width: 75%; height: 180mm; }
+  .cetak-info { width: 25%; }
+}

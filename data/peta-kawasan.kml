@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+        <Style id="warna_13">
+          <LineStyle><color>ffffbf00</color><width>2</width></LineStyle>
+          <PolyStyle><color>ccffbf00</color></PolyStyle>
+        </Style>
+        <Placemark>
+          <name>Zona 6 - Zona Rimba Agroforestry</name>
+          <description>Kawasan Eksisting &middot; &plusmn;0.866 Ha</description>
+          <styleUrl>#warna_13</styleUrl>
+          <Polygon><outerBoundaryIs><LinearRing><coordinates>107.728286,-6.908693,0 107.728007,-6.908416,0 107.72746,-6.908832,0 107.72724,-6.908896,0 107.72709,-6.909135,0 107.726966,-6.909316,0 107.726719,-6.909556,0 107.726998,-6.909753,0 107.727165,-6.909631,0 107.727309,-6.909577,0 107.727454,-6.90937,0 107.727669,-6.909183,0 107.727733,-6.909231,0 107.727819,-6.909162,0 107.727776,-6.909087,0 107.728286,-6.908693,0</coordinates></LinearRing></outerBoundaryIs></Polygon>
+        </Placemark></Document></kml>
